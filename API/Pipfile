@@ -5,9 +5,22 @@ name = "pypi"
 
 [packages]
 fastapi = {extras = ["standard"], version = "*"}
+sqlalchemy = "*"
+psycopg2-binary = "*"
+passlib = {extras = ["bcrypt"], version = "*"}
+pyjwt = "*"
+python-multipart = "*"
+email-validator = "*"
+pydantic = {extras = ["email"], version = "*"}
+uvicorn = {extras = ["standard"], version = "*"}
 
 [dev-packages]
+pytest = "*"
+pytest-cov = "*"
+black = "*"
+isort = "*"
+flake8 = "*"
 
 [requires]
-python_version = "3.12"
-python_full_version = "3.12.8"
+python_version = "3.10"
+python_full_version = "3.10.12"
