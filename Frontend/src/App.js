@@ -4,7 +4,7 @@ import { Container, Alert } from 'react-bootstrap';
 import axios from 'axios';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
-// API configuration
+#api configuration with base url and default headers
 const API_URL = 'http://localhost:8000';
 const api = axios.create({
   baseURL: API_URL,
@@ -13,7 +13,7 @@ const api = axios.create({
   }
 });
 
-// Auth context
+#auth context for managing user authentication state throughout the app
 const AuthContext = React.createContext(null);
 
 const AuthProvider = ({ children }) => {
@@ -21,7 +21,7 @@ const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(localStorage.getItem('token'));
   const [loading, setLoading] = useState(true);
 
-  // Load user on mount
+  #load user on mount and when token changes
   useEffect(() => {
     const loadUser = async () => {
       if (token) {
@@ -42,7 +42,7 @@ const AuthProvider = ({ children }) => {
     loadUser();
   }, [token]);
 
-  // Login function
+  #login function to authenticate user with username and password
   const login = async (username, password) => {
     try {
       const formData = new FormData();
@@ -56,7 +56,7 @@ const AuthProvider = ({ children }) => {
         setToken(data.access_token);
         api.defaults.headers.common['Authorization'] = `Bearer ${data.access_token}`;
         
-        // Get user data
+        #get user data after successful login
         const { data: userData } = await api.get('/users/me');
         setUser(userData);
         
@@ -71,7 +71,7 @@ const AuthProvider = ({ children }) => {
     }
   };
 
-  // Register function
+  #register function to create new user account
   const register = async (userData) => {
     try {
       const { data } = await api.post('/users/', userData);
@@ -85,7 +85,7 @@ const AuthProvider = ({ children }) => {
     }
   };
 
-  // Logout function
+  #logout function to clear user session
   const logout = () => {
     localStorage.removeItem('token');
     setToken(null);
@@ -93,7 +93,7 @@ const AuthProvider = ({ children }) => {
     delete api.defaults.headers.common['Authorization'];
   };
 
-  // Check if user is authenticated
+  #helper function to check if user is authenticated
   const isAuthenticated = () => {
     return !!token && !!user;
   };
@@ -114,7 +114,7 @@ const AuthProvider = ({ children }) => {
   );
 };
 
-// Navigation component
+#navigation component with conditional rendering based on auth state
 const Navigation = () => {
   const auth = React.useContext(AuthContext);
   
@@ -163,7 +163,7 @@ const Footer = () => (
   </footer>
 );
 
-// Simple pages
+#home page with static content for unauthenticated users
 const Home = () => (
   <div className="text-center my-5">
     <h1>Welcome to 4BookLovers</h1>
@@ -194,10 +194,12 @@ const Login = () => {
   
   const auth = React.useContext(AuthContext);
   
+  #redirect to dashboard if already logged in
   if (auth.isAuthenticated()) {
     return <Navigate to="/dashboard" />;
   }
   
+  #handle login form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
@@ -274,29 +276,32 @@ const Register = () => {
   
   const auth = React.useContext(AuthContext);
   
+  #redirect to dashboard if already logged in
   if (auth.isAuthenticated()) {
     return <Navigate to="/dashboard" />;
   }
   
+  #handle form input changes
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
   
+  #handle registration form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
     setError('');
     setSuccess('');
     
-    // Validate passwords match
+    #validate passwords match
     if (formData.password !== formData.confirmPassword) {
       setError('Passwords do not match');
       setIsLoading(false);
       return;
     }
     
-    // Validate password length
+    #validate password length
     if (formData.password.length < 8) {
       setError('Password must be at least 8 characters long');
       setIsLoading(false);
@@ -403,6 +408,7 @@ const Register = () => {
   );
 };
 
+#modal component for adding new books
 const AddBookModal = ({ show, handleClose, handleAddBook }) => {
   const [formData, setFormData] = useState({
     title: '',
@@ -414,11 +420,13 @@ const AddBookModal = ({ show, handleClose, handleAddBook }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
+  #handle form input changes
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
+  #handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
@@ -516,42 +524,233 @@ const AddBookModal = ({ show, handleClose, handleAddBook }) => {
   );
 };
 
+#modal component for adding or editing book notes
+const BookNoteModal = ({ show, handleClose, bookId, bookTitle, existingNote, handleSaveNote }) => {
+  const [formData, setFormData] = useState({
+    note_text: existingNote?.note_text || '',
+    is_private: existingNote?.is_private !== false #default to private if no existing note or existing is private
+  });
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  #reset form when the modal is shown with different data
+  useEffect(() => {
+    if (show) {
+      setFormData({
+        note_text: existingNote?.note_text || '',
+        is_private: existingNote?.is_private !== false
+      });
+      setError('');
+    }
+  }, [show, existingNote]);
+
+  #handle form input changes
+  const handleChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setFormData(prev => ({ 
+      ...prev, 
+      [name]: type === 'checkbox' ? checked : value 
+    }));
+  };
+
+  #handle form submission
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setError('');
+
+    try {
+      await handleSaveNote({
+        book_id: bookId,
+        note_text: formData.note_text,
+        is_private: formData.is_private
+      });
+      handleClose();
+    } catch (error) {
+      setError(error.message || 'Failed to save note');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <div className={`modal ${show ? 'd-block' : 'd-none'}`} tabIndex="-1" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+      <div className="modal-dialog modal-dialog-centered">
+        <div className="modal-content">
+          <div className="modal-header">
+            <h5 className="modal-title">{existingNote ? 'Edit' : 'Add'} Note for "{bookTitle}"</h5>
+            <button type="button" className="btn-close" onClick={handleClose}></button>
+          </div>
+          <div className="modal-body">
+            {error && <Alert variant="danger">{error}</Alert>}
+            <form onSubmit={handleSubmit}>
+              <div className="mb-3">
+                <label htmlFor="note_text" className="form-label">Your Notes</label>
+                <textarea 
+                  className="form-control" 
+                  id="note_text" 
+                  name="note_text"
+                  rows="6"
+                  value={formData.note_text}
+                  onChange={handleChange}
+                  placeholder="Add your personal notes, thoughts, or reminders about this book..."
+                  required
+                ></textarea>
+                <small className="text-muted">Maximum 2000 characters</small>
+              </div>
+              <div className="mb-3 form-check">
+                <input 
+                  type="checkbox" 
+                  className="form-check-input" 
+                  id="is_private" 
+                  name="is_private"
+                  checked={formData.is_private}
+                  onChange={handleChange}
+                />
+                <label className="form-check-label" htmlFor="is_private">Keep this note private</label>
+                <small className="form-text d-block text-muted">Uncheck to make your notes visible to other users</small>
+              </div>
+              <div className="modal-footer">
+                <button type="button" className="btn btn-secondary" onClick={handleClose}>Cancel</button>
+                <button type="submit" className="btn btn-primary" disabled={isLoading}>
+                  {isLoading ? 'Saving...' : 'Save Note'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+#main dashboard component for authenticated users
 const Dashboard = () => {
   const auth = React.useContext(AuthContext);
   const [books, setBooks] = useState([]);
+  const [shelves, setShelves] = useState([]);
+  const [selectedShelf, setSelectedShelf] = useState(null);
   const [showAddModal, setShowAddModal] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isSearching, setIsSearching] = useState(false);
   
+  #book notes state
+  const [showNoteModal, setShowNoteModal] = useState(false);
+  const [selectedBook, setSelectedBook] = useState(null);
+  const [currentNote, setCurrentNote] = useState(null);
+  const [loadingNote, setLoadingNote] = useState(false);
+  
+  #fetch shelves when the component mounts
   useEffect(() => {
-    // Only fetch if user is authenticated
     if (auth.isAuthenticated()) {
-      const fetchBooks = async () => {
+      const fetchShelves = async () => {
         try {
-          const response = await api.get('/books/');
-          setBooks(response.data);
-          setError('');
+          const response = await api.get('/shelves/');
+          setShelves(response.data);
         } catch (err) {
-          console.error('Error fetching books:', err);
-          setError('Failed to load books. Please try again later.');
-        } finally {
-          setLoading(false);
+          console.error('Error fetching shelves:', err);
         }
       };
-  
-      fetchBooks();
+      
+      fetchShelves();
     }
-  }, [showAddModal, auth]); // Re-fetch when modal is closed or auth changes
+  }, [auth]);
+
+  #function to fetch all books
+  const fetchAllBooks = async () => {
+    setLoading(true);
+    try {
+      const response = await api.get('/books/');
+      setBooks(response.data);
+      setError('');
+    } catch (err) {
+      console.error('Error fetching books:', err);
+      setError('Failed to load books. Please try again later.');
+    } finally {
+      setLoading(false);
+    }
+  };
   
-  // Redirect if not authenticated
+  #function to fetch books by shelf
+  const fetchBooksByShelf = async (shelf) => {
+    setLoading(true);
+    try {
+      const response = await api.get(`/shelves/${shelf.id}/books`);
+      setBooks(response.data);
+      setError('');
+    } catch (err) {
+      console.error('Error fetching books for shelf:', err);
+      setError(`Failed to load books for shelf "${shelf.name}". Please try again later.`);
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  #function to search books by title, author, or isbn
+  const searchBooks = async (query) => {
+    setLoading(true);
+    setIsSearching(true);
+    try {
+      const response = await api.get(`/books/?query=${encodeURIComponent(query)}`);
+      setBooks(response.data);
+      setError('');
+    } catch (err) {
+      console.error('Error searching books:', err);
+      setError('Failed to search books. Please try again later.');
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  #handle search input change
+  const handleSearchChange = (e) => {
+    const query = e.target.value;
+    setSearchQuery(query);
+  };
+  
+  #handle search form submission
+  const handleSearch = (e) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      searchBooks(searchQuery);
+    } else {
+      setIsSearching(false);
+      if (selectedShelf) {
+        fetchBooksByShelf(selectedShelf);
+      } else {
+        fetchAllBooks();
+      }
+    }
+  };
+  
+  #fetch books based on the selected shelf or all books
+  useEffect(() => {
+    if (auth.isAuthenticated()) {
+      if (isSearching && searchQuery.trim()) {
+        searchBooks(searchQuery);
+      } else if (selectedShelf) {
+        fetchBooksByShelf(selectedShelf);
+      } else {
+        fetchAllBooks();
+      }
+    }
+  }, [selectedShelf, showAddModal, auth, isSearching]); #re-fetch when shelf changes, modal is closed, auth changes, or search status changes
+  
+  #redirect if not authenticated
   if (!auth.isAuthenticated()) {
     return <Navigate to="/login" />;
   }
   
+  #function to add a new book
   const handleAddBook = async (bookData) => {
     try {
       const response = await api.post('/books/', bookData);
-      setBooks(prevBooks => [...prevBooks, response.data]);
+      if (!selectedShelf) {
+        #only update the books list if we're viewing all books
+        setBooks(prevBooks => [...prevBooks, response.data]);
+      }
       return response.data;
     } catch (error) {
       console.error('Error adding book:', error);
@@ -559,13 +758,134 @@ const Dashboard = () => {
     }
   };
 
+  #function to add a book to a shelf
   const handleAddToShelf = async (bookId, shelfName) => {
     try {
-      // Normally we would get the shelf ID from an API call
-      // For demo purposes, we'll just show an alert
-      alert(`Added book to "${shelfName}" shelf!`);
+      #find the shelf id by name
+      const shelf = shelves.find(s => s.name === shelfName);
+      if (shelf) {
+        await api.post(`/shelves/${shelf.id}/books/${bookId}`);
+        alert(`Added book to "${shelfName}" shelf!`);
+        
+        #refresh books if viewing the shelf we just added to
+        if (selectedShelf && selectedShelf.id === shelf.id) {
+          fetchBooksByShelf(shelf);
+        }
+      } else {
+        alert(`Shelf "${shelfName}" not found`);
+      }
     } catch (error) {
       console.error('Error adding to shelf:', error);
+      alert(`Error adding to shelf: ${error.response?.data?.detail || error.message}`);
+    }
+  };
+  
+  #function to remove a book from the current shelf
+  const handleRemoveFromShelf = async (bookId) => {
+    try {
+      #only proceed if a shelf is selected
+      if (!selectedShelf) {
+        return;
+      }
+      
+      await api.delete(`/shelves/${selectedShelf.id}/books/${bookId}`);
+      
+      #remove the book from the local state to update ui immediately
+      setBooks(prevBooks => prevBooks.filter(book => book.id !== bookId));
+      
+      alert(`Removed book from "${selectedShelf.name}" shelf!`);
+    } catch (error) {
+      console.error('Error removing from shelf:', error);
+      alert(`Error removing from shelf: ${error.response?.data?.detail || error.message}`);
+    }
+  };
+
+  #handle shelf selection
+  const handleShelfClick = (shelf) => {
+    setSelectedShelf(shelf);
+  };
+
+  #handle showing all books
+  const handleShowAllBooks = () => {
+    setSelectedShelf(null);
+    setIsSearching(false);
+    setSearchQuery('');
+  };
+  
+  #clear search and show all books or shelf books
+  const handleClearSearch = () => {
+    setSearchQuery('');
+    setIsSearching(false);
+    if (selectedShelf) {
+      fetchBooksByShelf(selectedShelf);
+    } else {
+      fetchAllBooks();
+    }
+  };
+  
+  #function to handle clicking the add/edit note button
+  const handleNoteClick = async (book) => {
+    setSelectedBook(book);
+    setLoadingNote(true);
+    
+    try {
+      #try to get an existing note for this book
+      const response = await api.get(`/book-notes/${book.id}`);
+      setCurrentNote(response.data);
+    } catch (error) {
+      #if note doesn't exist, set to null (will create a new one)
+      if (error.response && error.response.status === 404) {
+        setCurrentNote(null);
+      } else {
+        console.error('Error fetching note:', error);
+      }
+    } finally {
+      setLoadingNote(false);
+      setShowNoteModal(true);
+    }
+  };
+  
+  #function to save a note
+  const handleSaveNote = async (noteData) => {
+    try {
+      const response = await api.post('/book-notes/', noteData);
+      
+      #if we're looking at a specific shelf, refresh the books
+      if (selectedShelf) {
+        await fetchBooksByShelf(selectedShelf);
+      } else if (isSearching) {
+        await searchBooks(searchQuery);
+      } else {
+        await fetchAllBooks();
+      }
+      
+      return response.data;
+    } catch (error) {
+      console.error('Error saving note:', error);
+      throw new Error(error.response?.data?.detail || 'Failed to save note');
+    }
+  };
+  
+  #function to delete a note
+  const handleDeleteNote = async (bookId) => {
+    if (window.confirm('Are you sure you want to delete this note?')) {
+      try {
+        await api.delete(`/book-notes/${bookId}`);
+        
+        #refresh books list after deletion
+        if (selectedShelf) {
+          await fetchBooksByShelf(selectedShelf);
+        } else if (isSearching) {
+          await searchBooks(searchQuery);
+        } else {
+          await fetchAllBooks();
+        }
+        
+        alert('Note deleted successfully');
+      } catch (error) {
+        console.error('Error deleting note:', error);
+        alert(`Failed to delete note: ${error.response?.data?.detail || error.message}`);
+      }
     }
   };
   
@@ -581,6 +901,28 @@ const Dashboard = () => {
         </button>
       </div>
       
+      <div className="mb-4">
+        <form onSubmit={handleSearch} className="d-flex">
+          <input
+            type="text"
+            className="form-control me-2"
+            placeholder="Search books by title, author, or ISBN..."
+            value={searchQuery}
+            onChange={handleSearchChange}
+          />
+          <button type="submit" className="btn btn-outline-primary me-2">Search</button>
+          {isSearching && (
+            <button 
+              type="button" 
+              className="btn btn-outline-secondary"
+              onClick={handleClearSearch}
+            >
+              Clear
+            </button>
+          )}
+        </form>
+      </div>
+      
       <div className="row mt-4">
         <div className="col-md-4">
           <div className="card">
@@ -589,9 +931,23 @@ const Dashboard = () => {
             </div>
             <div className="card-body">
               <ul className="list-group">
-                <li className="list-group-item">Want to Read</li>
-                <li className="list-group-item">Currently Reading</li>
-                <li className="list-group-item">Read</li>
+                <li 
+                  className={`list-group-item ${!selectedShelf ? 'active' : ''}`}
+                  style={{ cursor: 'pointer' }}
+                  onClick={handleShowAllBooks}
+                >
+                  All Books
+                </li>
+                {shelves.map(shelf => (
+                  <li 
+                    key={shelf.id} 
+                    className={`list-group-item ${selectedShelf?.id === shelf.id ? 'active' : ''}`}
+                    style={{ cursor: 'pointer' }}
+                    onClick={() => handleShelfClick(shelf)}
+                  >
+                    {shelf.name}
+                  </li>
+                ))}
               </ul>
             </div>
           </div>
@@ -599,7 +955,14 @@ const Dashboard = () => {
         <div className="col-md-8">
           <div className="card">
             <div className="card-header">
-              <h4>My Books</h4>
+              <h4>
+                {isSearching 
+                  ? `Search results for "${searchQuery}"` 
+                  : selectedShelf 
+                    ? `Books in "${selectedShelf.name}"` 
+                    : 'All Books'
+                }
+              </h4>
             </div>
             <div className="card-body">
               {loading ? (
@@ -607,36 +970,73 @@ const Dashboard = () => {
               ) : error ? (
                 <Alert variant="danger">{error}</Alert>
               ) : books.length === 0 ? (
-                <p>You haven't added any books yet. Click "Add New Book" to get started!</p>
+                <p>{isSearching
+                  ? `No books found matching "${searchQuery}".`
+                  : selectedShelf 
+                    ? `You don't have any books in the "${selectedShelf.name}" shelf yet.` 
+                    : "You haven't added any books yet. Click \"Add New Book\" to get started!"}</p>
               ) : (
                 <div className="list-group">
                   {books.map(book => (
                     <div key={book.id} className="list-group-item list-group-item-action">
                       <div className="d-flex w-100 justify-content-between">
                         <h5 className="mb-1">{book.title}</h5>
-                        <small>{book.publication_year}</small>
+                        <div>
+                          {selectedShelf && (
+                            <button 
+                              className="btn btn-sm btn-outline-danger me-2" 
+                              onClick={() => handleRemoveFromShelf(book.id)}
+                              title={`Remove from ${selectedShelf.name}`}
+                            >
+                              ✕ Remove from shelf
+                            </button>
+                          )}
+                          <small>{book.publication_year}</small>
+                        </div>
                       </div>
                       <p className="mb-1">by {book.author}</p>
-                      <div className="mt-2">
-                        <small className="text-muted me-2">Add to shelf:</small>
+                      
+                      <div className="d-flex justify-content-between align-items-center mt-2">
                         <button 
-                          className="btn btn-sm btn-outline-primary me-1" 
-                          onClick={() => handleAddToShelf(book.id, 'Want to Read')}
+                          className="btn btn-sm btn-outline-info" 
+                          onClick={() => handleNoteClick(book)}
+                          title="Add or edit your notes for this book"
                         >
-                          Want to Read
+                          📝 {book.has_note ? 'Edit Note' : 'Add Note'}
                         </button>
-                        <button 
-                          className="btn btn-sm btn-outline-primary me-1" 
-                          onClick={() => handleAddToShelf(book.id, 'Currently Reading')}
-                        >
-                          Currently Reading
-                        </button>
-                        <button 
-                          className="btn btn-sm btn-outline-primary"
-                          onClick={() => handleAddToShelf(book.id, 'Read')}
-                        >
-                          Read
-                        </button>
+                        
+                        <div>
+                          {!selectedShelf ? (
+                            <div className="d-inline">
+                              <small className="text-muted me-2">Add to shelf:</small>
+                              {shelves.map(shelf => (
+                                <button 
+                                  key={shelf.id}
+                                  className="btn btn-sm btn-outline-primary me-1" 
+                                  onClick={() => handleAddToShelf(book.id, shelf.name)}
+                                >
+                                  {shelf.name}
+                                </button>
+                              ))}
+                            </div>
+                          ) : (
+                            <div className="d-inline">
+                              <small className="text-muted me-2">Add to another shelf:</small>
+                              {shelves
+                                .filter(shelf => shelf.id !== selectedShelf.id)
+                                .map(shelf => (
+                                  <button 
+                                    key={shelf.id}
+                                    className="btn btn-sm btn-outline-primary me-1" 
+                                    onClick={() => handleAddToShelf(book.id, shelf.name)}
+                                  >
+                                    {shelf.name}
+                                  </button>
+                                ))
+                              }
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </div>
                   ))}
@@ -652,10 +1052,26 @@ const Dashboard = () => {
         handleClose={() => setShowAddModal(false)}
         handleAddBook={handleAddBook}
       />
+      
+      {selectedBook && (
+        <BookNoteModal
+          show={showNoteModal}
+          handleClose={() => {
+            setShowNoteModal(false);
+            setSelectedBook(null);
+            setCurrentNote(null);
+          }}
+          bookId={selectedBook.id}
+          bookTitle={selectedBook.title}
+          existingNote={currentNote}
+          handleSaveNote={handleSaveNote}
+        />
+      )}
     </div>
   );
 };
 
+#main app component with routing
 function App() {
   return (
     <AuthProvider>
