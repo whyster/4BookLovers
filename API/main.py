@@ -15,21 +15,21 @@ import jwt
 from contextlib import contextmanager
 from datetime import timezone
 
-#importing all the necessary libraries and modules for our api
+# importing all the necessary libraries and modules for our api
 
 DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://postgres:postgres@db:5432/booklover")
 engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
-#setting up our database connection with sqlalchemy
+# setting up our database connection with sqlalchemy
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 SECRET_KEY = os.getenv("SECRET_KEY", secrets.token_urlsafe(32))
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
-#security setup for password hashing and jwt tokens
+# security setup for password hashing and jwt tokens
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
@@ -39,11 +39,11 @@ app = FastAPI(
     version="1.0.0"
 )
 
-#creating our fastapi app instance
+# creating our fastapi app instance
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  #allowing all origins for development
+    allow_origins=["*"],  # allowing all origins for development
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -56,14 +56,14 @@ class User(Base):
     id = Column(Integer, primary_key=True, index=True)
     username = Column(String(50), unique=True, index=True, nullable=False)
     email = Column(String(100), unique=True, index=True, nullable=False)
-    password_hash = Column(String(255), nullable=False) #we store hashed passwords for security
+    password_hash = Column(String(255), nullable=False) # we store hashed passwords for security
     created_at = Column(DateTime(timezone=True), default=func.now())
     last_login = Column(DateTime(timezone=True), nullable=True)
-    failed_login_attempts = Column(Integer, default=0) #track login attempts for account security
-    locked_until = Column(DateTime(timezone=True), nullable=True) #implements account lockout after failed attempts
+    failed_login_attempts = Column(Integer, default=0) # track login attempts for account security
+    locked_until = Column(DateTime(timezone=True), nullable=True) # implements account lockout after failed attempts
     is_active = Column(Boolean, default=True)
     
-    #defining relationships with other tables
+    # defining relationships with other tables
     sessions = relationship("Session", back_populates="user", cascade="all, delete-orphan")
     shelves = relationship("Shelf", back_populates="user", cascade="all, delete-orphan")
     reviews = relationship("Review", back_populates="user", cascade="all, delete-orphan")
@@ -76,9 +76,9 @@ class Session(Base):
     user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"))
     session_token = Column(String(255), unique=True, nullable=False)
     created_at = Column(DateTime(timezone=True), default=func.now())
-    last_active = Column(DateTime(timezone=True), default=func.now()) #tracks when user was last active
-    expires_at = Column(DateTime(timezone=True)) #used to enforce session timeout
-    device_info = Column(Text) #stores info about the device used for login
+    last_active = Column(DateTime(timezone=True), default=func.now()) # tracks when user was last active
+    expires_at = Column(DateTime(timezone=True)) # used to enforce session timeout
+    device_info = Column(Text) # stores info about the device used for login
     
     user = relationship("User", back_populates="sessions")
 
@@ -88,16 +88,16 @@ class Book(Base):
     id = Column(Integer, primary_key=True, index=True)
     title = Column(String(255), nullable=False)
     author = Column(String(255), nullable=False)
-    isbn = Column(String(20), unique=True) #international standard book number for unique identification
+    isbn = Column(String(20), unique=True) # international standard book number for unique identification
     publisher = Column(String(100))
     publication_year = Column(Integer)
     description = Column(Text)
-    cover_image_url = Column(Text) #url to book cover image
+    cover_image_url = Column(Text) # url to book cover image
     page_count = Column(Integer)
     language = Column(String(50))
     created_at = Column(DateTime(timezone=True), default=func.now())
     
-    #many-to-many relationships with tags and shelves
+    # many-to-many relationships with tags and shelves
     tags = relationship("Tag", secondary="book_tags", back_populates="books")
     shelves = relationship("Shelf", secondary="shelf_books", back_populates="books")
     reviews = relationship("Review", back_populates="book", cascade="all, delete-orphan")
@@ -107,16 +107,16 @@ class Tag(Base):
     __tablename__ = "tags"
     
     id = Column(Integer, primary_key=True, index=True)
-    name = Column(String(50), unique=True, nullable=False) #tags must be unique
+    name = Column(String(50), unique=True, nullable=False) # tags must be unique
     description = Column(String(1000))
     
-    #many-to-many relationship with books
+    # many-to-many relationship with books
     books = relationship("Book", secondary="book_tags", back_populates="tags")
 
 class BookTag(Base):
     __tablename__ = "book_tags"
     
-    #this is a junction table for the many-to-many relationship between books and tags
+    # this is a junction table for the many-to-many relationship between books and tags
     book_id = Column(Integer, ForeignKey("books.id", ondelete="CASCADE"), primary_key=True)
     tag_id = Column(Integer, ForeignKey("tags.id", ondelete="CASCADE"), primary_key=True)
     created_at = Column(DateTime(timezone=True), default=func.now())
@@ -128,20 +128,20 @@ class Shelf(Base):
     user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"))
     name = Column(String(100), nullable=False)
     description = Column(Text)
-    is_default = Column(Boolean, default=False) #indicates if this is a system shelf like 'want to read'
+    is_default = Column(Boolean, default=False) # indicates if this is a system shelf like 'want to read'
     created_at = Column(DateTime(timezone=True), default=func.now())
     
-    #relationships
+    # relationships
     user = relationship("User", back_populates="shelves")
     books = relationship("Book", secondary="shelf_books", back_populates="shelves")
 
 class ShelfBook(Base):
     __tablename__ = "shelf_books"
     
-    #junction table for the many-to-many relationship between shelves and books
+    # junction table for the many-to-many relationship between shelves and books
     shelf_id = Column(Integer, ForeignKey("shelves.id", ondelete="CASCADE"), primary_key=True)
     book_id = Column(Integer, ForeignKey("books.id", ondelete="CASCADE"), primary_key=True)
-    added_at = Column(DateTime(timezone=True), default=func.now()) #tracks when a book was added to a shelf
+    added_at = Column(DateTime(timezone=True), default=func.now()) # tracks when a book was added to a shelf
 
 class Review(Base):
     __tablename__ = "reviews"
@@ -149,12 +149,12 @@ class Review(Base):
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"))
     book_id = Column(Integer, ForeignKey("books.id", ondelete="CASCADE"))
-    rating = Column(Integer) #1-5 star rating
-    review_text = Column(Text) #actual review content
+    rating = Column(Integer) # 1-5 star rating
+    review_text = Column(Text) # actual review content
     created_at = Column(DateTime(timezone=True), default=func.now())
-    updated_at = Column(DateTime(timezone=True), onupdate=func.now()) #updates automatically when review is edited
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now()) # updates automatically when review is edited
     
-    #relationships
+    # relationships
     user = relationship("User", back_populates="reviews")
     book = relationship("Book", back_populates="reviews")
 
@@ -164,19 +164,19 @@ class BookNote(Base):
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"))
     book_id = Column(Integer, ForeignKey("books.id", ondelete="CASCADE"))
-    note_text = Column(Text) #personal notes about a book
-    is_private = Column(Boolean, default=True) #controls whether other users can see this note
+    note_text = Column(Text) # personal notes about a book
+    is_private = Column(Boolean, default=True) # controls whether other users can see this note
     created_at = Column(DateTime(timezone=True), default=func.now())
-    updated_at = Column(DateTime(timezone=True), onupdate=func.now()) #updates automatically when note is edited
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now()) # updates automatically when note is edited
     
-    #relationships
+    # relationships
     user = relationship("User", back_populates="notes")
     book = relationship("Book", back_populates="notes")
 
 # Pydantic Models
 class UserBase(BaseModel):
     username: str
-    email: EmailStr #ensures email validation
+    email: EmailStr # ensures email validation
 
 class UserCreate(UserBase):
     password: str
@@ -186,41 +186,41 @@ class UserCreate(UserBase):
         if len(v) < 8:
             raise ValueError('Password must be at least 8 characters long')
         return v
-    #validates password meets minimum requirements
+    # validates password meets minimum requirements
 
 class UserResponse(UserBase):
     id: int
     created_at: datetime
     
     class Config:
-        orm_mode = True #allows conversion from sqlalchemy model to pydantic model
+        orm_mode = True # allows conversion from sqlalchemy model to pydantic model
 
 class Token(BaseModel):
-    access_token: str #jwt token
-    token_type: str #usually "bearer"
+    access_token: str # jwt token
+    token_type: str # usually "bearer"
 
 class TokenData(BaseModel):
     username: Optional[str] = None
     session_id: Optional[int] = None
-    #data stored in the jwt token payload
+    # data stored in the jwt token payload
 
 class TagBase(BaseModel):
     name: str
     description: Optional[str] = None
 
 class TagCreate(TagBase):
-    pass #just inherits from base model, no additional fields
+    pass # just inherits from base model, no additional fields
 
 class TagResponse(TagBase):
     id: int
     
     class Config:
-        orm_mode = True #allows conversion from orm model to json
+        orm_mode = True # allows conversion from orm model to json
 
 class BookBase(BaseModel):
     title: str
     author: str
-    isbn: Optional[str] = None #isbn is optional when creating a book
+    isbn: Optional[str] = None # isbn is optional when creating a book
     publisher: Optional[str] = None
     publication_year: Optional[int] = None
     description: Optional[str] = None
@@ -229,79 +229,79 @@ class BookBase(BaseModel):
     language: Optional[str] = None
 
 class BookCreate(BookBase):
-    tags: Optional[List[int]] = [] #list of tag ids to assign to the book
+    tags: Optional[List[int]] = [] # list of tag ids to assign to the book
 
 class BookResponse(BookBase):
     id: int
     created_at: datetime
-    tags: List[TagResponse] #includes the full tag objects, not just ids
+    tags: List[TagResponse] # includes the full tag objects, not just ids
     
     class Config:
-        orm_mode = True #enables orm instance to json conversion
+        orm_mode = True # enables orm instance to json conversion
 
 class ShelfBase(BaseModel):
     name: str
     description: Optional[str] = None
 
 class ShelfCreate(ShelfBase):
-    pass #inherits all fields from base
+    pass # inherits all fields from base
 
 class ShelfResponse(ShelfBase):
     id: int
     user_id: int
-    is_default: bool #indicates if this is a system shelf
+    is_default: bool # indicates if this is a system shelf
     created_at: datetime
     
     class Config:
-        orm_mode = True #enables conversion to json
+        orm_mode = True # enables conversion to json
 
 class ReviewBase(BaseModel):
     book_id: int
-    rating: int = Field(..., ge=1, le=5) #rating must be between 1 and 5
-    review_text: Optional[str] = Field(None, max_length=1000) #limits review length
+    rating: int = Field(..., ge=1, le=5) # rating must be between 1 and 5
+    review_text: Optional[str] = Field(None, max_length=1000) # limits review length
 
 class ReviewCreate(ReviewBase):
-    pass #inherits all fields from base
+    pass # inherits all fields from base
 
 class ReviewResponse(ReviewBase):
     id: int
     user_id: int
     created_at: datetime
-    updated_at: Optional[datetime] = None #may be null if never updated
+    updated_at: Optional[datetime] = None # may be null if never updated
     
     class Config:
-        orm_mode = True #enables conversion to json
+        orm_mode = True # enables conversion to json
 
 class BookNoteBase(BaseModel):
     book_id: int
-    note_text: str = Field(..., max_length=2000) #limits note length to 2000 chars
-    is_private: bool = True #defaults to private
+    note_text: str = Field(..., max_length=2000) # limits note length to 2000 chars
+    is_private: bool = True # defaults to private
 
 class BookNoteCreate(BookNoteBase):
-    pass #inherits all fields from base
+    pass # inherits all fields from base
 
 class BookNoteResponse(BookNoteBase):
     id: int
     user_id: int
     created_at: datetime
-    updated_at: Optional[datetime] = None #may be null if never updated
+    updated_at: Optional[datetime] = None # may be null if never updated
     
     class Config:
-        orm_mode = True #enables conversion to json
+        orm_mode = True # enables conversion to json
 
 # Dependency
 def get_db():
     db = SessionLocal()
     try:
-        yield db #provides a db session to the request
+        yield db # provides a db session to the request
     finally:
-        db.close() #ensures session is closed even if there's an exception
+        db.close() # ensures session is closed even if there's an exception
 
 def verify_password(plain_password, hashed_password):
-    return pwd_context.verify(plain_password, hashed_password) #checks if password matches hash
+    return pwd_context.verify(plain_password, hashed_password) # checks if password matches hash
 
 def get_password_hash(password):
-    return pwd_context.hash(password) #creates secure password hash
+    return pwd_context.hash(password) # creates secure password hash
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     to_encode = data.copy()
@@ -309,36 +309,36 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
         expire = datetime.now(timezone.utc) + expires_delta
     else:
         expire = datetime.now(timezone.utc) + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    to_encode.update({"exp": expire}) #adds expiration time to token payload
+    to_encode.update({"exp": expire}) # adds expiration time to token payload
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
-    return encoded_jwt #returns the jwt token
+    return encoded_jwt # returns the jwt token
 
 def get_user_by_username(db: Session, username: str):
-    return db.query(User).filter(User.username == username).first() #finds user by username
+    return db.query(User).filter(User.username == username).first() # finds user by username
 
 def authenticate_user(db: Session, username: str, password: str):
     user = get_user_by_username(db, username)
     if not user:
         return False
     
-    #account lockout functionality
+    # account lockout functionality
     if user.locked_until and user.locked_until > datetime.now(timezone.utc):
-        return False #account is locked
+        return False # account is locked
     
     if not verify_password(password, user.password_hash):
-        #brute force protection
+        # brute force protection
         user.failed_login_attempts += 1
         
-        #lock account after 5 failed attempts
+        # lock account after 5 failed attempts
         if user.failed_login_attempts >= 5:
             user.locked_until = datetime.now(timezone.utc) + timedelta(hours=24)
         
         db.commit()
         return False
     
-    #successful login
-    user.failed_login_attempts = 0 #reset counter on success
-    user.last_login = datetime.now(timezone.utc) #update last login timestamp
+    # successful login
+    user.failed_login_attempts = 0 # reset counter on success
+    user.last_login = datetime.now(timezone.utc) # update last login timestamp
     db.commit()
     
     return user
@@ -350,7 +350,7 @@ async def get_current_user(token: str = Depends(oauth2_scheme), db: Session = De
         headers={"WWW-Authenticate": "Bearer"},
     )
     try:
-        #decode the jwt token
+        # decode the jwt token
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         username: str = payload.get("sub")
         session_id: int = payload.get("session_id")
@@ -358,14 +358,14 @@ async def get_current_user(token: str = Depends(oauth2_scheme), db: Session = De
             raise credentials_exception
         token_data = TokenData(username=username, session_id=session_id)
     except jwt.PyJWTError:
-        raise credentials_exception #invalid token
+        raise credentials_exception # invalid token
     
-    #get the user from database
+    # get the user from database
     user = get_user_by_username(db, username=token_data.username)
     if user is None:
         raise credentials_exception
     
-    #validate that the session exists and hasn't expired
+    # validate that the session exists and hasn't expired
     session = db.query(Session).filter(
         Session.id == token_data.session_id,
         Session.user_id == user.id,
@@ -373,9 +373,9 @@ async def get_current_user(token: str = Depends(oauth2_scheme), db: Session = De
     ).first()
     
     if not session:
-        raise credentials_exception #invalid or expired session
+        raise credentials_exception # invalid or expired session
     
-    #extend session lifetime on activity
+    # extend session lifetime on activity
     session.last_active = datetime.now(timezone.utc)
     session.expires_at = datetime.now(timezone.utc) + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     db.commit()
@@ -387,11 +387,11 @@ async def get_current_user(token: str = Depends(oauth2_scheme), db: Session = De
 async def check_session_timeout(request: Request, call_next):
     response = await call_next(request)
     
-    #skip auth for these paths
+    # skip auth for these paths
     if request.url.path in ["/token", "/docs", "/openapi.json"]:
         return response
     
-    #extract token from authorization header
+    # extract token from authorization header
     auth_header = request.headers.get("Authorization")
     if auth_header and auth_header.startswith("Bearer "):
         token = auth_header.split(" ")[1]
@@ -399,15 +399,15 @@ async def check_session_timeout(request: Request, call_next):
             payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
             session_id = payload.get("session_id")
             
-            #create a new db session for the middleware
+            # create a new db session for the middleware
             db = SessionLocal()
             try:
-                #check if user has been inactive for too long
+                # check if user has been inactive for too long
                 session = db.query(Session).filter(Session.id == session_id).first()
                 if session:
-                    #auto-logout after 30 minutes of inactivity
+                    # auto-logout after 30 minutes of inactivity
                     if (datetime.now(timezone.utc) - session.last_active) > timedelta(minutes=30):
-                        session.expires_at = datetime.now(timezone.utc) #invalidate session
+                        session.expires_at = datetime.now(timezone.utc) # invalidate session
                         db.commit()
                         return Response(
                             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -415,9 +415,9 @@ async def check_session_timeout(request: Request, call_next):
                             headers={"WWW-Authenticate": "Bearer"}
                         )
             finally:
-                db.close() #always close the db session
+                db.close() # always close the db session
         except Exception:
-            pass #ignore errors in middleware
+            pass # ignore errors in middleware
     
     return response
 
