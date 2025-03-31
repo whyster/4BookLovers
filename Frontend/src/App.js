@@ -4,7 +4,7 @@ import { Container, Alert } from 'react-bootstrap';
 import axios from 'axios';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
-#api configuration with base url and default headers
+// api configuration with base url and default headers
 const API_URL = 'http://localhost:8000';
 const api = axios.create({
   baseURL: API_URL,
@@ -13,7 +13,7 @@ const api = axios.create({
   }
 });
 
-#auth context for managing user authentication state throughout the app
+// auth context for managing user authentication state throughout the app
 const AuthContext = React.createContext(null);
 
 const AuthProvider = ({ children }) => {
@@ -21,7 +21,7 @@ const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(localStorage.getItem('token'));
   const [loading, setLoading] = useState(true);
 
-  #load user on mount and when token changes
+  // load user on mount and when token changes
   useEffect(() => {
     const loadUser = async () => {
       if (token) {
@@ -42,7 +42,7 @@ const AuthProvider = ({ children }) => {
     loadUser();
   }, [token]);
 
-  #login function to authenticate user with username and password
+  // login function to authenticate user with username and password
   const login = async (username, password) => {
     try {
       const formData = new FormData();
@@ -56,7 +56,7 @@ const AuthProvider = ({ children }) => {
         setToken(data.access_token);
         api.defaults.headers.common['Authorization'] = `Bearer ${data.access_token}`;
         
-        #get user data after successful login
+        // get user data after successful login
         const { data: userData } = await api.get('/users/me');
         setUser(userData);
         
@@ -71,7 +71,7 @@ const AuthProvider = ({ children }) => {
     }
   };
 
-  #register function to create new user account
+  // register function to create new user account
   const register = async (userData) => {
     try {
       const { data } = await api.post('/users/', userData);
@@ -85,7 +85,7 @@ const AuthProvider = ({ children }) => {
     }
   };
 
-  #logout function to clear user session
+  // logout function to clear user session
   const logout = () => {
     localStorage.removeItem('token');
     setToken(null);
@@ -93,7 +93,7 @@ const AuthProvider = ({ children }) => {
     delete api.defaults.headers.common['Authorization'];
   };
 
-  #helper function to check if user is authenticated
+  // helper function to check if user is authenticated
   const isAuthenticated = () => {
     return !!token && !!user;
   };
@@ -114,7 +114,7 @@ const AuthProvider = ({ children }) => {
   );
 };
 
-#navigation component with conditional rendering based on auth state
+// navigation component with conditional rendering based on auth state
 const Navigation = () => {
   const auth = React.useContext(AuthContext);
   
@@ -163,7 +163,7 @@ const Footer = () => (
   </footer>
 );
 
-#home page with static content for unauthenticated users
+// home page with static content for unauthenticated users
 const Home = () => (
   <div className="text-center my-5">
     <h1>Welcome to 4BookLovers</h1>
@@ -194,12 +194,12 @@ const Login = () => {
   
   const auth = React.useContext(AuthContext);
   
-  #redirect to dashboard if already logged in
+  // redirect to dashboard if already logged in
   if (auth.isAuthenticated()) {
     return <Navigate to="/dashboard" />;
   }
   
-  #handle login form submission
+  // handle login form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
@@ -276,32 +276,32 @@ const Register = () => {
   
   const auth = React.useContext(AuthContext);
   
-  #redirect to dashboard if already logged in
+  // redirect to dashboard if already logged in
   if (auth.isAuthenticated()) {
     return <Navigate to="/dashboard" />;
   }
   
-  #handle form input changes
+  // handle form input changes
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
   
-  #handle registration form submission
+  // handle registration form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
     setError('');
     setSuccess('');
     
-    #validate passwords match
+    // validate passwords match
     if (formData.password !== formData.confirmPassword) {
       setError('Passwords do not match');
       setIsLoading(false);
       return;
     }
     
-    #validate password length
+    // validate password length
     if (formData.password.length < 8) {
       setError('Password must be at least 8 characters long');
       setIsLoading(false);
@@ -408,7 +408,7 @@ const Register = () => {
   );
 };
 
-#modal component for adding new books
+// modal component for adding new books
 const AddBookModal = ({ show, handleClose, handleAddBook }) => {
   const [formData, setFormData] = useState({
     title: '',
@@ -420,13 +420,13 @@ const AddBookModal = ({ show, handleClose, handleAddBook }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
-  #handle form input changes
+  // handle form input changes
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  #handle form submission
+  // handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
@@ -524,16 +524,16 @@ const AddBookModal = ({ show, handleClose, handleAddBook }) => {
   );
 };
 
-#modal component for adding or editing book notes
+// modal component for adding or editing book notes
 const BookNoteModal = ({ show, handleClose, bookId, bookTitle, existingNote, handleSaveNote }) => {
   const [formData, setFormData] = useState({
     note_text: existingNote?.note_text || '',
-    is_private: existingNote?.is_private !== false #default to private if no existing note or existing is private
+    is_private: existingNote?.is_private !== false // default to private if no existing note or existing is private
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
-  #reset form when the modal is shown with different data
+  // reset form when the modal is shown with different data
   useEffect(() => {
     if (show) {
       setFormData({
@@ -544,7 +544,7 @@ const BookNoteModal = ({ show, handleClose, bookId, bookTitle, existingNote, han
     }
   }, [show, existingNote]);
 
-  #handle form input changes
+  // handle form input changes
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     setFormData(prev => ({ 
@@ -553,7 +553,7 @@ const BookNoteModal = ({ show, handleClose, bookId, bookTitle, existingNote, han
     }));
   };
 
-  #handle form submission
+  // handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
@@ -624,7 +624,7 @@ const BookNoteModal = ({ show, handleClose, bookId, bookTitle, existingNote, han
   );
 };
 
-#main dashboard component for authenticated users
+// main dashboard component for authenticated users
 const Dashboard = () => {
   const auth = React.useContext(AuthContext);
   const [books, setBooks] = useState([]);
@@ -636,13 +636,13 @@ const Dashboard = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearching, setIsSearching] = useState(false);
   
-  #book notes state
+  // book notes state
   const [showNoteModal, setShowNoteModal] = useState(false);
   const [selectedBook, setSelectedBook] = useState(null);
   const [currentNote, setCurrentNote] = useState(null);
   const [loadingNote, setLoadingNote] = useState(false);
   
-  #fetch shelves when the component mounts
+  // fetch shelves when the component mounts
   useEffect(() => {
     if (auth.isAuthenticated()) {
       const fetchShelves = async () => {
@@ -658,7 +658,7 @@ const Dashboard = () => {
     }
   }, [auth]);
 
-  #function to fetch all books
+  // function to fetch all books
   const fetchAllBooks = async () => {
     setLoading(true);
     try {
@@ -673,7 +673,7 @@ const Dashboard = () => {
     }
   };
   
-  #function to fetch books by shelf
+  // function to fetch books by shelf
   const fetchBooksByShelf = async (shelf) => {
     setLoading(true);
     try {
@@ -688,7 +688,7 @@ const Dashboard = () => {
     }
   };
   
-  #function to search books by title, author, or isbn
+  // function to search books by title, author, or isbn
   const searchBooks = async (query) => {
     setLoading(true);
     setIsSearching(true);
@@ -704,13 +704,13 @@ const Dashboard = () => {
     }
   };
   
-  #handle search input change
+  // handle search input change
   const handleSearchChange = (e) => {
     const query = e.target.value;
     setSearchQuery(query);
   };
   
-  #handle search form submission
+  // handle search form submission
   const handleSearch = (e) => {
     e.preventDefault();
     if (searchQuery.trim()) {
@@ -725,7 +725,7 @@ const Dashboard = () => {
     }
   };
   
-  #fetch books based on the selected shelf or all books
+  // fetch books based on the selected shelf or all books
   useEffect(() => {
     if (auth.isAuthenticated()) {
       if (isSearching && searchQuery.trim()) {
@@ -736,19 +736,19 @@ const Dashboard = () => {
         fetchAllBooks();
       }
     }
-  }, [selectedShelf, showAddModal, auth, isSearching]); #re-fetch when shelf changes, modal is closed, auth changes, or search status changes
+  }, [selectedShelf, showAddModal, auth, isSearching]); // re-fetch when shelf changes, modal is closed, auth changes, or search status changes
   
-  #redirect if not authenticated
+  // redirect if not authenticated
   if (!auth.isAuthenticated()) {
     return <Navigate to="/login" />;
   }
   
-  #function to add a new book
+  // function to add a new book
   const handleAddBook = async (bookData) => {
     try {
       const response = await api.post('/books/', bookData);
       if (!selectedShelf) {
-        #only update the books list if we're viewing all books
+        // only update the books list if we're viewing all books
         setBooks(prevBooks => [...prevBooks, response.data]);
       }
       return response.data;
@@ -758,16 +758,16 @@ const Dashboard = () => {
     }
   };
 
-  #function to add a book to a shelf
+  // function to add a book to a shelf
   const handleAddToShelf = async (bookId, shelfName) => {
     try {
-      #find the shelf id by name
+      // find the shelf id by name
       const shelf = shelves.find(s => s.name === shelfName);
       if (shelf) {
         await api.post(`/shelves/${shelf.id}/books/${bookId}`);
         alert(`Added book to "${shelfName}" shelf!`);
         
-        #refresh books if viewing the shelf we just added to
+        // refresh books if viewing the shelf we just added to
         if (selectedShelf && selectedShelf.id === shelf.id) {
           fetchBooksByShelf(shelf);
         }
@@ -780,17 +780,17 @@ const Dashboard = () => {
     }
   };
   
-  #function to remove a book from the current shelf
+  // function to remove a book from the current shelf
   const handleRemoveFromShelf = async (bookId) => {
     try {
-      #only proceed if a shelf is selected
+      // only proceed if a shelf is selected
       if (!selectedShelf) {
         return;
       }
       
       await api.delete(`/shelves/${selectedShelf.id}/books/${bookId}`);
       
-      #remove the book from the local state to update ui immediately
+      // remove the book from the local state to update ui immediately
       setBooks(prevBooks => prevBooks.filter(book => book.id !== bookId));
       
       alert(`Removed book from "${selectedShelf.name}" shelf!`);
@@ -800,19 +800,19 @@ const Dashboard = () => {
     }
   };
 
-  #handle shelf selection
+  // handle shelf selection
   const handleShelfClick = (shelf) => {
     setSelectedShelf(shelf);
   };
 
-  #handle showing all books
+  // handle showing all books
   const handleShowAllBooks = () => {
     setSelectedShelf(null);
     setIsSearching(false);
     setSearchQuery('');
   };
   
-  #clear search and show all books or shelf books
+  // clear search and show all books or shelf books
   const handleClearSearch = () => {
     setSearchQuery('');
     setIsSearching(false);
@@ -823,17 +823,17 @@ const Dashboard = () => {
     }
   };
   
-  #function to handle clicking the add/edit note button
+  // function to handle clicking the add/edit note button
   const handleNoteClick = async (book) => {
     setSelectedBook(book);
     setLoadingNote(true);
     
     try {
-      #try to get an existing note for this book
+      // try to get an existing note for this book
       const response = await api.get(`/book-notes/${book.id}`);
       setCurrentNote(response.data);
     } catch (error) {
-      #if note doesn't exist, set to null (will create a new one)
+      // if note doesn't exist, set to null (will create a new one)
       if (error.response && error.response.status === 404) {
         setCurrentNote(null);
       } else {
@@ -845,12 +845,12 @@ const Dashboard = () => {
     }
   };
   
-  #function to save a note
+  // function to save a note
   const handleSaveNote = async (noteData) => {
     try {
       const response = await api.post('/book-notes/', noteData);
       
-      #if we're looking at a specific shelf, refresh the books
+      // if we're looking at a specific shelf, refresh the books
       if (selectedShelf) {
         await fetchBooksByShelf(selectedShelf);
       } else if (isSearching) {
@@ -866,13 +866,13 @@ const Dashboard = () => {
     }
   };
   
-  #function to delete a note
+  // function to delete a note
   const handleDeleteNote = async (bookId) => {
     if (window.confirm('Are you sure you want to delete this note?')) {
       try {
         await api.delete(`/book-notes/${bookId}`);
         
-        #refresh books list after deletion
+        // refresh books list after deletion
         if (selectedShelf) {
           await fetchBooksByShelf(selectedShelf);
         } else if (isSearching) {
@@ -1071,7 +1071,7 @@ const Dashboard = () => {
   );
 };
 
-#main app component with routing
+// main app component with routing
 function App() {
   return (
     <AuthProvider>
