@@ -4,8 +4,8 @@ import json
 # Configuration
 API_URL = "http://localhost:8000"
 LOGIN_CREDENTIALS = {
-    "username": "admin",  # Replace with your admin username
-    "password": "admin123"  # Replace with your admin password
+    "username": "admin",  
+    "password": "admin123"  
 }
 
 # Sample books data

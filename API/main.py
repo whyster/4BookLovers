@@ -3,7 +3,7 @@ from typing import List, Optional
 import os
 import secrets
 from passlib.context import CryptContext
-from fastapi import FastAPI, Depends, HTTPException, status, Request, Response
+from fastapi import FastAPI, Depends, HTTPException, status, Request, Response, Query
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import create_engine, Column, Integer, String, Boolean, Text, ForeignKey, DateTime, func, select, insert, update
@@ -568,47 +568,101 @@ def get_books(
     query: Optional[str] = None,
     search_by: Optional[str] = "all",  # all, title, author, isbn
     skip: int = 0, 
-    limit: int = 100, 
+    limit: int = 100,
+    sort_field: Optional[str] = None,  # title, author, year
+    sort_direction: Optional[str] = "asc",  # asc, desc
+    year_from: Optional[int] = None,
+    year_to: Optional[int] = None,
+    language: Optional[str] = None,
+    shelf_ids: List[int] = Query([]),
     db: Session = Depends(get_db),
     current_user: Optional[User] = Depends(get_current_user)
 ):
-    #search functionality
+    # Start with a base query
+    base_query = db.query(Book)
+    
+    # Apply search filter if query is provided
     if query:
-        db_query = db.query(Book)
-        
         if search_by == "title" or search_by == "all":
-            title_query = db.query(Book).filter(Book.title.ilike(f"%{query}%"))
+            title_query = base_query.filter(Book.title.ilike(f"%{query}%"))
             if search_by == "title":
-                db_query = title_query
+                base_query = title_query
             else:
-                db_query = title_query
-                #search by multiple fields when search_by is "all"
+                # Search by multiple fields when search_by is "all"
                 author_query = db.query(Book).filter(Book.author.ilike(f"%{query}%"))
                 isbn_query = db.query(Book).filter(Book.isbn.ilike(f"%{query}%"))
-                db_query = db_query.union(author_query, isbn_query)
+                description_query = db.query(Book).filter(Book.description.ilike(f"%{query}%"))
+                base_query = title_query.union(author_query, isbn_query, description_query)
         elif search_by == "author":
-            db_query = db.query(Book).filter(Book.author.ilike(f"%{query}%"))
+            base_query = base_query.filter(Book.author.ilike(f"%{query}%"))
         elif search_by == "isbn":
-            db_query = db.query(Book).filter(Book.isbn.ilike(f"%{query}%"))
+            base_query = base_query.filter(Book.isbn.ilike(f"%{query}%"))
+    
+    # Apply advanced filters if provided
+    if year_from is not None:
+        base_query = base_query.filter(Book.publication_year >= year_from)
+    
+    if year_to is not None:
+        base_query = base_query.filter(Book.publication_year <= year_to)
+    
+    if language:
+        base_query = base_query.filter(Book.language.ilike(f"%{language}%"))
+    
+    # Filter by shelves if provided
+    if shelf_ids and current_user:
+        # Get books that are in any of the selected shelves
+        shelf_books_query = db.query(ShelfBook.book_id).filter(
+            ShelfBook.shelf_id.in_(shelf_ids)
+        ).distinct()
+        
+        shelf_book_ids = [book_id for (book_id,) in shelf_books_query]
+        
+        if shelf_book_ids:
+            base_query = base_query.filter(Book.id.in_(shelf_book_ids))
+        else:
+            # If no books are in the selected shelves, return empty list
+            return []
+    
+    # Apply sorting if specified
+    if sort_field:
+        if sort_field == "title":
+            order_column = Book.title
+        elif sort_field == "author":
+            order_column = Book.author
+        elif sort_field == "year":
+            order_column = Book.publication_year
+        else:
+            order_column = Book.id  # Default sort by ID
+        
+        if sort_direction.lower() == "desc":
+            base_query = base_query.order_by(order_column.desc())
+        else:
+            base_query = base_query.order_by(order_column.asc())
     else:
-        #no query - return all books
-        db_query = db.query(Book)
+        # Default sort by id (newest first)
+        base_query = base_query.order_by(Book.id.desc())
     
-    books = db_query.offset(skip).limit(limit).all() #pagination
+    # Apply pagination and get results
+    books = base_query.offset(skip).limit(limit).all()
     
-    #mark books that the user has notes for
+    # Mark books that the user has notes for
     if current_user:
         book_ids = [book.id for book in books]
-        user_notes = db.query(BookNote.book_id).filter(
-            BookNote.user_id == current_user.id,
-            BookNote.book_id.in_(book_ids)
-        ).all()
         
-        user_note_book_ids = [note[0] for note in user_notes]
-        
-        #add has_note flag to each book
-        for book in books:
-            setattr(book, "has_note", book.id in user_note_book_ids)
+        if book_ids:  # Only query if there are books
+            user_notes = db.query(BookNote.book_id).filter(
+                BookNote.user_id == current_user.id,
+                BookNote.book_id.in_(book_ids)
+            ).all()
+            
+            user_note_book_ids = [note[0] for note in user_notes]
+            
+            # Add has_note flag to each book
+            for book in books:
+                setattr(book, "has_note", book.id in user_note_book_ids)
+        else:
+            # No books to annotate
+            pass
     
     return books
 

@@ -1,0 +1,240 @@
+/* Custom CSS for 4BookLovers */
+
+:root {
+  --primary-color: #5e548e;
+  --secondary-color: #9f86c0;
+  --accent-color: #be95c4;
+  --light-color: #e0b1cb;
+  --background-color: #f8f9fa;
+  --text-primary: #2e2e2e;
+  --text-secondary: #555555;
+  --success-color: #5cb85c;
+  --warning-color: #f0ad4e;
+  --danger-color: #d9534f;
+}
+
+/* Basic styling */
+body {
+  font-family: 'Nunito', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  background-color: var(--background-color);
+  color: var(--text-primary);
+  line-height: 1.6;
+}
+
+/* Navigation bar styling */
+.navbar {
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  padding: 0.8rem 1rem;
+}
+
+.navbar-brand {
+  font-weight: 700;
+  font-size: 1.4rem;
+  letter-spacing: 0.5px;
+}
+
+.navbar-dark.bg-dark {
+  background-color: var(--primary-color) !important;
+}
+
+/* Card styling */
+.card {
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+  border: none;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:hover {
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.12);
+}
+
+.card-header {
+  background-color: white;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  padding: 1rem 1.25rem;
+  border-top-left-radius: 8px !important;
+  border-top-right-radius: 8px !important;
+}
+
+.card-header h4 {
+  font-weight: 600;
+  color: var(--primary-color);
+  margin-bottom: 0;
+}
+
+/* Button styling */
+.btn-primary {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+}
+
+.btn-primary:hover, .btn-primary:focus {
+  background-color: #4a4372;
+  border-color: #4a4372;
+}
+
+.btn-outline-primary {
+  color: var(--primary-color);
+  border-color: var(--primary-color);
+}
+
+.btn-outline-primary:hover, .btn-outline-primary:focus {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+}
+
+.btn-outline-info {
+  color: var(--secondary-color);
+  border-color: var(--secondary-color);
+}
+
+.btn-outline-info:hover, .btn-outline-info:focus {
+  background-color: var(--secondary-color);
+  border-color: var(--secondary-color);
+  color: white;
+}
+
+/* List group styling */
+.list-group-item {
+  border: 1px solid rgba(0, 0, 0, 0.075);
+  padding: 0.75rem 1.25rem;
+  transition: background-color 0.2s ease;
+}
+
+.list-group-item:hover {
+  background-color: rgba(94, 84, 142, 0.05);
+}
+
+.list-group-item.active {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+}
+
+/* Book items styling */
+.list-group-item.list-group-item-action {
+  border-left: 3px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.list-group-item.list-group-item-action:hover {
+  border-left-color: var(--accent-color);
+}
+
+/* Form control styling */
+.form-control {
+  border-radius: 6px;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  padding: 0.5rem 0.75rem;
+}
+
+.form-control:focus {
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 0.2rem rgba(190, 149, 196, 0.25);
+}
+
+/* Welcome heading */
+h1 {
+  color: var(--primary-color);
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+}
+
+/* Footer styling */
+footer {
+  background-color: var(--primary-color) !important;
+}
+
+/* Modal styling */
+.modal-content {
+  border: none;
+  border-radius: 8px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+}
+
+.modal-header {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  padding: 1.25rem;
+}
+
+.modal-footer {
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+  padding: 1.25rem;
+}
+
+/* Badge styling */
+.badge {
+  font-weight: 500;
+  padding: 0.35em 0.65em;
+  border-radius: 4px;
+}
+
+.badge.bg-secondary {
+  background-color: var(--secondary-color) !important;
+}
+
+/* Alert styling */
+.alert {
+  border: none;
+  border-radius: 6px;
+}
+
+/* Book title styling */
+.list-group-item h5 {
+  font-weight: 600;
+  color: var(--primary-color);
+}
+
+/* Book author styling */
+.list-group-item p.mb-1 {
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
+/* Add animation for modal */
+.modal.d-block .modal-dialog {
+  animation: modalFadeIn 0.3s ease;
+}
+
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Style for home page */
+.home-hero {
+  background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+  color: white;
+  padding: 3rem 0;
+  border-radius: 8px;
+  margin-bottom: 2rem;
+}
+
+/* Custom utility classes */
+.text-primary-custom {
+  color: var(--primary-color) !important;
+}
+
+.bg-light-custom {
+  background-color: rgba(224, 177, 203, 0.1) !important;
+}
+
+/* Empty state containers */
+.empty-state {
+  padding: 2rem;
+  text-align: center;
+  color: var(--text-secondary);
+}
+
+.empty-state i {
+  font-size: 3rem;
+  color: var(--light-color);
+  margin-bottom: 1rem;
+}
