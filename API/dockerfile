@@ -2,10 +2,14 @@ FROM python:3.10
 
 WORKDIR /app
 
-# Install pipenv
-RUN pip install --no-cache-dir pipenv
+# Install pipenv and other utilities
+RUN pip install --no-cache-dir pipenv && \
+    apt-get update && \
+    apt-get install -y postgresql-client curl && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
-# Copy Pipfile and Pipfile.lock
+# Copy Pipfile and Pipfile.lock first
 COPY Pipfile Pipfile.lock ./
 
 # Install dependencies
@@ -14,6 +18,9 @@ RUN pipenv install --deploy --system
 # Copy the rest of the code
 COPY . .
 
+# Make sure the startup script is executable
+RUN chmod +x /app/start.sh
+
 # Expose port for FastAPI
 EXPOSE 8000
 
@@ -21,5 +28,5 @@ EXPOSE 8000
 ENV PYTHONUNBUFFERED=1
 ENV DATABASE_URL=postgresql://postgres:postgres@db:5432/booklover
 
-# Run the application
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+# Run the startup script
+CMD ["/app/start.sh"]

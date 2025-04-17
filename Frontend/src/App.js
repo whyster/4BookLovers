@@ -121,7 +121,9 @@ const Navigation = () => {
   return (
     <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
       <div className="container">
-        <Link className="navbar-brand" to="/">4BookLovers</Link>
+        <Link className="navbar-brand d-flex align-items-center" to="/">
+          <i className="fas fa-book-open me-2"></i> 4BookLovers
+        </Link>
         <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
           <span className="navbar-toggler-icon"></span>
         </button>
@@ -129,22 +131,41 @@ const Navigation = () => {
           <ul className="navbar-nav ms-auto">
             {auth.isAuthenticated() ? (
               <>
-                <li className="nav-item">
-                  <Link className="nav-link" to="/dashboard">My Books</Link>
+                <li className="nav-item mx-1">
+                  <Link className="nav-link" to="/dashboard">
+                    <i className="fas fa-book me-1"></i> My Books
+                  </Link>
                 </li>
-                <li className="nav-item">
-                  <span className="nav-link" style={{ cursor: 'pointer' }} onClick={auth.logout}>
-                    Logout ({auth.user?.username})
-                  </span>
+                <li className="nav-item dropdown mx-1">
+                  <a className="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i className="fas fa-user-circle me-1"></i> {auth.user?.username}
+                  </a>
+                  <ul className="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                    <li>
+                      <Link className="dropdown-item" to="/dashboard">
+                        <i className="fas fa-tachometer-alt me-2"></i> Dashboard
+                      </Link>
+                    </li>
+                    <li><hr className="dropdown-divider" /></li>
+                    <li>
+                      <a className="dropdown-item" href="#" onClick={auth.logout}>
+                        <i className="fas fa-sign-out-alt me-2"></i> Logout
+                      </a>
+                    </li>
+                  </ul>
                 </li>
               </>
             ) : (
               <>
-                <li className="nav-item">
-                  <Link className="nav-link" to="/login">Login</Link>
+                <li className="nav-item mx-1">
+                  <Link className="nav-link" to="/login">
+                    <i className="fas fa-sign-in-alt me-1"></i> Login
+                  </Link>
                 </li>
-                <li className="nav-item">
-                  <Link className="nav-link" to="/register">Register</Link>
+                <li className="nav-item mx-1">
+                  <Link className="nav-link btn btn-primary text-white px-3" to="/register">
+                    <i className="fas fa-user-plus me-1"></i> Register
+                  </Link>
                 </li>
               </>
             )}
@@ -156,31 +177,145 @@ const Navigation = () => {
 };
 
 const Footer = () => (
-  <footer className="bg-dark text-light py-3 mt-auto">
-    <div className="container text-center">
-      <p className="mb-0">© 2025 4BookLovers - A platform for book enthusiasts</p>
+  <footer className="bg-dark text-light py-4 mt-auto">
+    <div className="container">
+      <div className="row">
+        <div className="col-md-4 mb-3 mb-md-0">
+          <h5 className="mb-3">4BookLovers</h5>
+          <p className="mb-0 text-light-50">A platform for book enthusiasts to discover, track, and share their reading journey.</p>
+        </div>
+        <div className="col-md-4 mb-3 mb-md-0">
+          <h5 className="mb-3">Quick Links</h5>
+          <ul className="list-unstyled">
+            <li><Link to="/" className="text-decoration-none text-light-50">Home</Link></li>
+            <li><Link to="/login" className="text-decoration-none text-light-50">Login</Link></li>
+            <li><Link to="/register" className="text-decoration-none text-light-50">Register</Link></li>
+          </ul>
+        </div>
+        <div className="col-md-4">
+          <h5 className="mb-3">Connect</h5>
+          <div className="d-flex gap-3">
+            <a href="#" className="text-light"><i className="fab fa-facebook-f fa-lg"></i></a>
+            <a href="#" className="text-light"><i className="fab fa-twitter fa-lg"></i></a>
+            <a href="#" className="text-light"><i className="fab fa-instagram fa-lg"></i></a>
+            <a href="#" className="text-light"><i className="fab fa-goodreads-g fa-lg"></i></a>
+          </div>
+        </div>
+      </div>
+      <hr className="my-3 bg-light" />
+      <div className="text-center">
+        <p className="mb-0">© 2025 4BookLovers - All rights reserved</p>
+      </div>
     </div>
   </footer>
 );
 
-// home page with static content for unauthenticated users
+// home page with improved UI for unauthenticated users
 const Home = () => (
-  <div className="text-center my-5">
-    <h1>Welcome to 4BookLovers</h1>
-    <p className="lead">Discover, track, and share your reading journey</p>
-    <div className="my-4">
-      <h2>Popular Books</h2>
+  <div>
+    <div className="home-hero text-center mb-5 p-5 rounded">
+      <h1 className="display-4 fw-bold text-white">Welcome to 4BookLovers</h1>
+      <p className="lead text-white mb-4">Discover, track, and share your reading journey</p>
+      <div className="d-grid gap-2 d-sm-flex justify-content-sm-center">
+        <Link to="/login" className="btn btn-light btn-lg px-4 gap-3">
+          <i className="fas fa-sign-in-alt me-2"></i> Log In
+        </Link>
+        <Link to="/register" className="btn btn-outline-light btn-lg px-4">
+          <i className="fas fa-user-plus me-2"></i> Sign Up
+        </Link>
+      </div>
+    </div>
+    
+    <div className="container">
+      <div className="row mb-5">
+        <div className="col-md-4 mb-4">
+          <div className="card h-100 text-center p-4">
+            <div className="card-body">
+              <div className="mb-4">
+                <i className="fas fa-book fa-3x text-primary-custom"></i>
+              </div>
+              <h3 className="card-title h4 mb-3">Track Your Reading</h3>
+              <p className="card-text">Keep track of books you've read, are currently reading, or want to read in the future.</p>
+            </div>
+          </div>
+        </div>
+        <div className="col-md-4 mb-4">
+          <div className="card h-100 text-center p-4">
+            <div className="card-body">
+              <div className="mb-4">
+                <i className="fas fa-bookmark fa-3x text-primary-custom"></i>
+              </div>
+              <h3 className="card-title h4 mb-3">Create Custom Shelves</h3>
+              <p className="card-text">Organize your books into custom shelves based on genres, themes, or any category you can imagine.</p>
+            </div>
+          </div>
+        </div>
+        <div className="col-md-4 mb-4">
+          <div className="card h-100 text-center p-4">
+            <div className="card-body">
+              <div className="mb-4">
+                <i className="fas fa-pencil-alt fa-3x text-primary-custom"></i>
+              </div>
+              <h3 className="card-title h4 mb-3">Take Personal Notes</h3>
+              <p className="card-text">Add private or public notes to any book to remember your thoughts and insights.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <h2 className="text-center mb-4">Popular Books</h2>
       <div className="row justify-content-center">
-        {['The Great Gatsby', 'To Kill a Mockingbird', 'Pride and Prejudice'].map(book => (
-          <div key={book} className="col-md-3 mb-4">
-            <div className="card">
+        {[
+          { 
+            title: 'The Great Gatsby', 
+            author: 'F. Scott Fitzgerald', 
+            image: 'https://m.media-amazon.com/images/I/71FTb9X6wsL._AC_UF1000,1000_QL80_.jpg',
+            year: 1925
+          },
+          { 
+            title: 'To Kill a Mockingbird', 
+            author: 'Harper Lee', 
+            image: 'https://m.media-amazon.com/images/I/71FxgtFKcQL._AC_UF1000,1000_QL80_.jpg',
+            year: 1960
+          },
+          { 
+            title: 'Pride and Prejudice', 
+            author: 'Jane Austen', 
+            image: 'https://m.media-amazon.com/images/I/71Q1tPupKjL._AC_UF1000,1000_QL80_.jpg',
+            year: 1813
+          },
+          { 
+            title: '1984', 
+            author: 'George Orwell', 
+            image: 'https://m.media-amazon.com/images/I/71kxa1-0mfL._AC_UF1000,1000_QL80_.jpg',
+            year: 1949
+          }
+        ].map(book => (
+          <div key={book.title} className="col-md-3 mb-4">
+            <div className="card h-100">
+              <div className="card-img-top bg-light-custom d-flex justify-content-center align-items-center" style={{ height: '200px', overflow: 'hidden' }}>
+                <img 
+                  src={book.image} 
+                  alt={book.title} 
+                  style={{ maxHeight: '100%', maxWidth: '100%', objectFit: 'contain' }}
+                />
+              </div>
               <div className="card-body">
-                <h5 className="card-title">{book}</h5>
-                <p className="card-text">A classic novel loved by readers worldwide.</p>
+                <h5 className="card-title">{book.title}</h5>
+                <p className="card-text text-muted mb-1">{book.author}</p>
+                <small className="text-muted">{book.year}</small>
               </div>
             </div>
           </div>
         ))}
+      </div>
+      
+      <div className="text-center my-5 py-3">
+        <h3>Join thousands of book lovers today!</h3>
+        <p className="lead">Create your account to start your reading journey</p>
+        <Link to="/register" className="btn btn-primary btn-lg px-4">
+          Get Started <i className="fas fa-arrow-right ms-2"></i>
+        </Link>
       </div>
     </div>
   </div>
@@ -401,6 +536,87 @@ const Register = () => {
             <div className="mt-3 text-center">
               <p>Already have an account? <Link to="/login">Login here</Link></p>
             </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// modal component for adding a new bookshelf
+const AddShelfModal = ({ show, handleClose, handleAddShelf }) => {
+  const [formData, setFormData] = useState({
+    name: '',
+    description: ''
+  });
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  // handle form input changes
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  // handle form submission
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setError('');
+
+    try {
+      await handleAddShelf(formData);
+      handleClose();
+    } catch (error) {
+      setError(error.response?.data?.detail || error.message || 'Failed to add bookshelf');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <div className={`modal ${show ? 'd-block' : 'd-none'}`} tabIndex="-1" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+      <div className="modal-dialog modal-dialog-centered">
+        <div className="modal-content">
+          <div className="modal-header">
+            <h5 className="modal-title">Create New Bookshelf</h5>
+            <button type="button" className="btn-close" onClick={handleClose}></button>
+          </div>
+          <div className="modal-body">
+            {error && <Alert variant="danger">{error}</Alert>}
+            <form onSubmit={handleSubmit}>
+              <div className="mb-3">
+                <label htmlFor="name" className="form-label">Shelf Name *</label>
+                <input 
+                  type="text" 
+                  className="form-control" 
+                  id="name" 
+                  name="name"
+                  value={formData.name}
+                  onChange={handleChange}
+                  placeholder="e.g., Fantasy Books, Summer Reading, etc."
+                  required
+                />
+              </div>
+              <div className="mb-3">
+                <label htmlFor="description" className="form-label">Description</label>
+                <textarea 
+                  className="form-control" 
+                  id="description" 
+                  name="description"
+                  rows="3"
+                  value={formData.description}
+                  onChange={handleChange}
+                  placeholder="Optional description of this bookshelf"
+                ></textarea>
+              </div>
+              <div className="modal-footer">
+                <button type="button" className="btn btn-secondary" onClick={handleClose}>Cancel</button>
+                <button type="submit" className="btn btn-primary" disabled={isLoading}>
+                  {isLoading ? 'Creating...' : 'Create Bookshelf'}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       </div>
@@ -630,11 +846,21 @@ const Dashboard = () => {
   const [books, setBooks] = useState([]);
   const [shelves, setShelves] = useState([]);
   const [selectedShelf, setSelectedShelf] = useState(null);
-  const [showAddModal, setShowAddModal] = useState(false);
+  const [showAddBookModal, setShowAddBookModal] = useState(false);
+  const [showAddShelfModal, setShowAddShelfModal] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  
+  // Search state
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearching, setIsSearching] = useState(false);
+  const [searchBy, setSearchBy] = useState('all');
+  const [sortOrder, setSortOrder] = useState('recent');
+  const [showAdvancedSearch, setShowAdvancedSearch] = useState(false);
+  const [yearFrom, setYearFrom] = useState('');
+  const [yearTo, setYearTo] = useState('');
+  const [language, setLanguage] = useState('');
+  const [searchShelves, setSearchShelves] = useState([]);
   
   // book notes state
   const [showNoteModal, setShowNoteModal] = useState(false);
@@ -656,7 +882,7 @@ const Dashboard = () => {
       
       fetchShelves();
     }
-  }, [auth]);
+  }, [auth, showAddShelfModal]); // Re-fetch when add shelf modal closes
 
   // function to fetch all books
   const fetchAllBooks = async () => {
@@ -688,12 +914,57 @@ const Dashboard = () => {
     }
   };
   
-  // function to search books by title, author, or isbn
-  const searchBooks = async (query) => {
+  // Function to build search params from all search state
+  const buildSearchParams = () => {
+    const params = new URLSearchParams();
+    
+    if (searchQuery.trim()) {
+      params.append('query', searchQuery.trim());
+    }
+    
+    params.append('search_by', searchBy);
+    
+    // Add sort parameter
+    const [sortField, sortDirection] = sortOrder.split('_');
+    if (sortField && sortField !== 'recent') {
+      params.append('sort_field', sortField);
+      params.append('sort_direction', sortDirection || 'asc');
+    }
+    
+    // Add advanced search parameters if they exist
+    if (yearFrom) params.append('year_from', yearFrom);
+    if (yearTo) params.append('year_to', yearTo);
+    if (language) params.append('language', language);
+    
+    // Add shelf filtering
+    if (searchShelves.length > 0) {
+      searchShelves.forEach(shelfId => {
+        params.append('shelf_ids', shelfId);
+      });
+    }
+    
+    return params;
+  };
+  
+  // Toggle a shelf in the search shelves array
+  const toggleSearchShelf = (shelfId) => {
+    setSearchShelves(prevShelves => {
+      if (prevShelves.includes(shelfId)) {
+        return prevShelves.filter(id => id !== shelfId);
+      } else {
+        return [...prevShelves, shelfId];
+      }
+    });
+  };
+  
+  // function to search books with advanced parameters
+  const searchBooks = async () => {
     setLoading(true);
     setIsSearching(true);
     try {
-      const response = await api.get(`/books/?query=${encodeURIComponent(query)}`);
+      const params = buildSearchParams();
+      const response = await api.get(`/books/?${params.toString()}`);
+      
       setBooks(response.data);
       setError('');
     } catch (err) {
@@ -713,8 +984,8 @@ const Dashboard = () => {
   // handle search form submission
   const handleSearch = (e) => {
     e.preventDefault();
-    if (searchQuery.trim()) {
-      searchBooks(searchQuery);
+    if (searchQuery.trim() || yearFrom || yearTo || language || searchShelves.length > 0) {
+      searchBooks();
     } else {
       setIsSearching(false);
       if (selectedShelf) {
@@ -725,18 +996,37 @@ const Dashboard = () => {
     }
   };
   
+  // Clear all search parameters
+  const handleClearSearch = () => {
+    setSearchQuery('');
+    setSearchBy('all');
+    setSortOrder('recent');
+    setYearFrom('');
+    setYearTo('');
+    setLanguage('');
+    setSearchShelves([]);
+    setShowAdvancedSearch(false);
+    setIsSearching(false);
+    
+    if (selectedShelf) {
+      fetchBooksByShelf(selectedShelf);
+    } else {
+      fetchAllBooks();
+    }
+  };
+  
   // fetch books based on the selected shelf or all books
   useEffect(() => {
     if (auth.isAuthenticated()) {
-      if (isSearching && searchQuery.trim()) {
-        searchBooks(searchQuery);
+      if (isSearching) {
+        searchBooks();
       } else if (selectedShelf) {
         fetchBooksByShelf(selectedShelf);
       } else {
         fetchAllBooks();
       }
     }
-  }, [selectedShelf, showAddModal, auth, isSearching]); // re-fetch when shelf changes, modal is closed, auth changes, or search status changes
+  }, [selectedShelf, showAddBookModal, auth, isSearching]); // re-fetch when shelf changes, modal is closed, auth changes, or search status changes
   
   // redirect if not authenticated
   if (!auth.isAuthenticated()) {
@@ -755,6 +1045,18 @@ const Dashboard = () => {
     } catch (error) {
       console.error('Error adding book:', error);
       throw new Error(error.response?.data?.detail || 'Failed to add book');
+    }
+  };
+
+  // function to create a new bookshelf
+  const handleAddShelf = async (shelfData) => {
+    try {
+      const response = await api.post('/shelves/', shelfData);
+      setShelves(prevShelves => [...prevShelves, response.data]);
+      return response.data;
+    } catch (error) {
+      console.error('Error creating bookshelf:', error);
+      throw error;
     }
   };
 
@@ -812,16 +1114,7 @@ const Dashboard = () => {
     setSearchQuery('');
   };
   
-  // clear search and show all books or shelf books
-  const handleClearSearch = () => {
-    setSearchQuery('');
-    setIsSearching(false);
-    if (selectedShelf) {
-      fetchBooksByShelf(selectedShelf);
-    } else {
-      fetchAllBooks();
-    }
-  };
+  // This function has been replaced by the enhanced handleClearSearch above
   
   // function to handle clicking the add/edit note button
   const handleNoteClick = async (book) => {
@@ -893,41 +1186,181 @@ const Dashboard = () => {
     <div className="my-5">
       <div className="d-flex justify-content-between align-items-center mb-4">
         <h1>Welcome, {auth.user?.username}!</h1>
-        <button 
-          className="btn btn-primary" 
-          onClick={() => setShowAddModal(true)}
-        >
-          Add New Book
-        </button>
+        <div>
+          <button 
+            className="btn btn-primary me-2" 
+            onClick={() => setShowAddShelfModal(true)}
+          >
+            Create New Bookshelf
+          </button>
+          <button 
+            className="btn btn-primary" 
+            onClick={() => setShowAddBookModal(true)}
+          >
+            Add New Book
+          </button>
+        </div>
       </div>
       
       <div className="mb-4">
-        <form onSubmit={handleSearch} className="d-flex">
-          <input
-            type="text"
-            className="form-control me-2"
-            placeholder="Search books by title, author, or ISBN..."
-            value={searchQuery}
-            onChange={handleSearchChange}
-          />
-          <button type="submit" className="btn btn-outline-primary me-2">Search</button>
-          {isSearching && (
-            <button 
-              type="button" 
-              className="btn btn-outline-secondary"
-              onClick={handleClearSearch}
-            >
-              Clear
-            </button>
-          )}
-        </form>
+        <div className="card">
+          <div className="card-body">
+            <form onSubmit={handleSearch}>
+              <div className="row g-3">
+                <div className="col-md-6">
+                  <div className="input-group">
+                    <span className="input-group-text bg-white border-end-0">
+                      <i className="fas fa-search text-primary-custom"></i>
+                    </span>
+                    <input
+                      type="text"
+                      className="form-control border-start-0"
+                      placeholder="Search books..."
+                      value={searchQuery}
+                      onChange={handleSearchChange}
+                      aria-label="Search books"
+                    />
+                  </div>
+                </div>
+                <div className="col-md-2">
+                  <select 
+                    className="form-select" 
+                    value={searchBy} 
+                    onChange={(e) => setSearchBy(e.target.value)}
+                    aria-label="Search field"
+                  >
+                    <option value="all">All Fields</option>
+                    <option value="title">Title</option>
+                    <option value="author">Author</option>
+                    <option value="isbn">ISBN</option>
+                  </select>
+                </div>
+                <div className="col-md-2">
+                  <select 
+                    className="form-select" 
+                    value={sortOrder} 
+                    onChange={(e) => setSortOrder(e.target.value)}
+                    aria-label="Sort order"
+                  >
+                    <option value="recent">Most Recent</option>
+                    <option value="title_asc">Title (A-Z)</option>
+                    <option value="title_desc">Title (Z-A)</option>
+                    <option value="author_asc">Author (A-Z)</option>
+                    <option value="author_desc">Author (Z-A)</option>
+                    <option value="year_asc">Year (Oldest)</option>
+                    <option value="year_desc">Year (Newest)</option>
+                  </select>
+                </div>
+                <div className="col-md-2 d-flex">
+                  <button type="submit" className="btn btn-primary me-2 flex-grow-1">
+                    <i className="fas fa-search me-2"></i> Search
+                  </button>
+                  {isSearching && (
+                    <button 
+                      type="button" 
+                      className="btn btn-outline-secondary"
+                      onClick={handleClearSearch}
+                    >
+                      <i className="fas fa-times"></i>
+                    </button>
+                  )}
+                </div>
+              </div>
+              
+              {/* Advanced search toggle */}
+              <div className="mt-2">
+                <button 
+                  type="button" 
+                  className="btn btn-link text-primary-custom p-0" 
+                  onClick={() => setShowAdvancedSearch(!showAdvancedSearch)}
+                >
+                  <i className={`fas fa-chevron-${showAdvancedSearch ? 'up' : 'down'} me-1`}></i>
+                  {showAdvancedSearch ? 'Hide' : 'Show'} Advanced Search
+                </button>
+              </div>
+              
+              {/* Advanced search options */}
+              {showAdvancedSearch && (
+                <div className="row mt-3 g-3">
+                  <div className="col-md-3">
+                    <label className="form-label">Publication Year</label>
+                    <div className="d-flex align-items-center">
+                      <input
+                        type="number"
+                        className="form-control"
+                        placeholder="From"
+                        value={yearFrom}
+                        onChange={(e) => setYearFrom(e.target.value)}
+                        min="0"
+                        max="9999"
+                      />
+                      <span className="mx-2">-</span>
+                      <input
+                        type="number"
+                        className="form-control"
+                        placeholder="To"
+                        value={yearTo}
+                        onChange={(e) => setYearTo(e.target.value)}
+                        min="0"
+                        max="9999"
+                      />
+                    </div>
+                  </div>
+                  <div className="col-md-3">
+                    <label className="form-label">Language</label>
+                    <select 
+                      className="form-select" 
+                      value={language} 
+                      onChange={(e) => setLanguage(e.target.value)}
+                    >
+                      <option value="">Any Language</option>
+                      <option value="en">English</option>
+                      <option value="es">Spanish</option>
+                      <option value="fr">French</option>
+                      <option value="de">German</option>
+                      <option value="it">Italian</option>
+                      <option value="ja">Japanese</option>
+                      <option value="zh">Chinese</option>
+                    </select>
+                  </div>
+                  <div className="col-md-6">
+                    <label className="form-label">Shelves</label>
+                    <div className="d-flex flex-wrap gap-2">
+                      {shelves.map(shelf => (
+                        <div className="form-check" key={`search-${shelf.id}`}>
+                          <input
+                            className="form-check-input"
+                            type="checkbox"
+                            id={`search-shelf-${shelf.id}`}
+                            checked={searchShelves.includes(shelf.id)}
+                            onChange={() => toggleSearchShelf(shelf.id)}
+                          />
+                          <label className="form-check-label" htmlFor={`search-shelf-${shelf.id}`}>
+                            {shelf.name}
+                          </label>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </form>
+          </div>
+        </div>
       </div>
       
       <div className="row mt-4">
         <div className="col-md-4">
           <div className="card">
-            <div className="card-header">
-              <h4>My Shelves</h4>
+            <div className="card-header d-flex justify-content-between align-items-center">
+              <h4 className="mb-0">My Shelves</h4>
+              <button 
+                className="btn btn-sm btn-outline-primary" 
+                onClick={() => setShowAddShelfModal(true)}
+                title="Create a new bookshelf"
+              >
+                + Add Shelf
+              </button>
             </div>
             <div className="card-body">
               <ul className="list-group">
@@ -946,23 +1379,55 @@ const Dashboard = () => {
                     onClick={() => handleShelfClick(shelf)}
                   >
                     {shelf.name}
+                    {shelf.is_default && <small className="badge bg-secondary ms-2">Default</small>}
                   </li>
                 ))}
               </ul>
+              {shelves.length === 0 && (
+                <div className="alert alert-info mt-3">
+                  You have no bookshelves yet. Click "Create New Bookshelf" to get started.
+                </div>
+              )}
             </div>
           </div>
         </div>
         <div className="col-md-8">
           <div className="card">
             <div className="card-header">
-              <h4>
-                {isSearching 
-                  ? `Search results for "${searchQuery}"` 
-                  : selectedShelf 
-                    ? `Books in "${selectedShelf.name}"` 
-                    : 'All Books'
-                }
-              </h4>
+              <div className="d-flex justify-content-between align-items-center">
+                <h4 className="mb-0">
+                  {isSearching 
+                    ? (
+                      <span>
+                        Search results 
+                        {searchQuery && <span> for "<strong>{searchQuery}</strong>"</span>}
+                        {(yearFrom || yearTo) && (
+                          <span> from {yearFrom || 'earliest'} to {yearTo || 'latest'}</span>
+                        )}
+                        {language && <span> in {language.toUpperCase()}</span>}
+                      </span>
+                    ) 
+                    : selectedShelf 
+                      ? `Books in "${selectedShelf.name}"` 
+                      : 'All Books'
+                  }
+                </h4>
+                {isSearching && books.length > 0 && (
+                  <small className="text-muted">{books.length} {books.length === 1 ? 'result' : 'results'}</small>
+                )}
+              </div>
+              
+              {isSearching && searchShelves.length > 0 && (
+                <div className="mt-2">
+                  <small className="text-muted">
+                    Filtered by shelves: {shelves
+                      .filter(shelf => searchShelves.includes(shelf.id))
+                      .map(shelf => shelf.name)
+                      .join(', ')
+                    }
+                  </small>
+                </div>
+              )}
             </div>
             <div className="card-body">
               {loading ? (
@@ -1047,10 +1512,17 @@ const Dashboard = () => {
         </div>
       </div>
       
+      {/* Modals */}
       <AddBookModal
-        show={showAddModal}
-        handleClose={() => setShowAddModal(false)}
+        show={showAddBookModal}
+        handleClose={() => setShowAddBookModal(false)}
         handleAddBook={handleAddBook}
+      />
+      
+      <AddShelfModal
+        show={showAddShelfModal}
+        handleClose={() => setShowAddShelfModal(false)}
+        handleAddShelf={handleAddShelf}
       />
       
       {selectedBook && (
